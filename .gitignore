@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Venv
+venv/
+env/
+.venv/
+
+# PyCharm
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs и выходные папки (не трекаем результаты обработки)
+processed/
+logs/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
