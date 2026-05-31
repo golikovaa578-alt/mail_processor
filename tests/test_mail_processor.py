@@ -7,6 +7,9 @@ import shutil
 import tempfile
 import pytest
 
+# На Windows нет /dev/null, используем временный файл
+NULL_LOG = os.devnull
+
 from email_reader import EmailReader, Email
 from classifier import EmailClassifier, CRITICAL, REQUESTS, MONITORING, SPAM, INFO, UNKNOWN
 from processor import MailProcessor, ProcessingStats
@@ -240,7 +243,7 @@ class TestMailProcessor:
 
     def test_process_creates_output_dirs(self, reader, classifier, temp_inbox, temp_output):
         """После обработки создаются папки категорий"""
-        processor = MailProcessor(reader, classifier, output_dir=temp_output, log_file="/dev/null")
+        processor = MailProcessor(reader, classifier, output_dir=temp_output, log_file=NULL_LOG)
         processor.process(temp_inbox)
 
         assert os.path.isdir(os.path.join(temp_output, CRITICAL))
@@ -258,7 +261,7 @@ class TestMailProcessor:
             "Subject: Ваш аккаунт будет заблокирован\n\nПодтвердите данные"
         )
 
-        processor = MailProcessor(reader, classifier, output_dir=temp_output, log_file="/dev/null")
+        processor = MailProcessor(reader, classifier, output_dir=temp_output, log_file=NULL_LOG)
         stats = processor.process(temp_inbox)
 
         assert stats.total == 2
@@ -271,7 +274,7 @@ class TestMailProcessor:
         write_email_file(temp_inbox, "m2.txt", "Subject: Дайджест\n\nИтоги квартала")
         write_email_file(temp_inbox, "m3.txt", "Subject: Привет\n\nКак дела")
 
-        processor = MailProcessor(reader, classifier, output_dir=temp_output, log_file="/dev/null")
+        processor = MailProcessor(reader, classifier, output_dir=temp_output, log_file=NULL_LOG)
         stats = processor.process(temp_inbox)
 
         assert stats.total == 3
