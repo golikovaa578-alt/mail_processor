@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class ProcessingStats:
-    """Статистика по итогам обработки"""
 
     def __init__(self):
         self.total = 0
@@ -34,9 +33,8 @@ class ProcessingStats:
         return 0
 
     def print_summary(self):
-        """Выводит красивую статистику в консоль"""
         print("\n" + "=" * 50)
-        print("  РЕЗУЛЬТАТЫ ОБРАБОТКИ ПОЧТЫ")
+        print(" РЕЗУЛЬТАТЫ ОБРАБОТКИ ПОЧТЫ")
         print("=" * 50)
         print(f"  Всего обработано: {self.total}")
         print(f"  Ошибок:          {self.errors}")
@@ -52,11 +50,6 @@ class ProcessingStats:
 
 
 class MailProcessor:
-    """
-    Основной обработчик.
-    Берёт письма, классифицирует, перемещает в нужные папки, ведёт лог.
-    """
-
     def __init__(self, reader, classifier, output_dir="processed", log_file="processing.log"):
         self.reader = reader
         self.classifier = classifier
@@ -64,19 +57,10 @@ class MailProcessor:
         self.log_file = log_file
 
     def process(self, inbox_path):
-        """
-        Главный метод - запускает всю обработку.
-        Возвращает ProcessingStats.
-        """
         stats = ProcessingStats()
-
-        # создаём папки для категорий если их нет
         self._prepare_output_dirs()
-
-        # читаем все письма
         pisma = self.reader.read_all(inbox_path)
         logger.info(f"Начинаем обработку {len(pisma)} писем")
-
         for email in pisma:
             try:
                 result = self.classifier.classify(email)
@@ -87,7 +71,6 @@ class MailProcessor:
                 logger.info(
                     f"{email.filename} -> {result.category} ({result.reason})"
                 )
-
             except Exception as e:
                 logger.error(f"Ошибка при обработке {email.filename}: {e}")
                 # пытаемся сохранить файл в unknown чтобы не потерять
@@ -101,7 +84,6 @@ class MailProcessor:
         return stats
 
     def _prepare_output_dirs(self):
-        """Создаёт папки для всех категорий"""
         for category in ALL_CATEGORIES:
             category_dir = os.path.join(self.output_dir, category)
             os.makedirs(category_dir, exist_ok=True)
@@ -110,8 +92,6 @@ class MailProcessor:
         """Перемещает файл письма в папку категории"""
         dest_dir = os.path.join(self.output_dir, category)
         dest_path = os.path.join(dest_dir, email.filename)
-
-        # если файл с таким именем уже есть - добавляем суффикс
         if os.path.exists(dest_path):
             base, ext = os.path.splitext(email.filename)
             timestamp = datetime.datetime.now().strftime("%H%M%S")
@@ -121,7 +101,6 @@ class MailProcessor:
         logger.debug(f"Скопировано: {email.filename} -> {category}/")
 
     def _write_log(self, email, result):
-        """Дописывает запись в лог-файл"""
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_line = (
             f"{timestamp} | {email.filename:<20} | "

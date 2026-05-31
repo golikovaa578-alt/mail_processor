@@ -2,7 +2,6 @@ import re
 import logging
 
 logger = logging.getLogger(__name__)
-
 # Категории
 CRITICAL = "critical"
 REQUESTS = "requests"
@@ -12,10 +11,7 @@ INFO = "info"
 UNKNOWN = "unknown"
 
 ALL_CATEGORIES = [CRITICAL, REQUESTS, MONITORING, SPAM, INFO, UNKNOWN]
-
-
 class ClassificationResult:
-    """Результат классификации одного письма"""
 
     def __init__(self, category, reason, confidence):
         self.category = category
@@ -24,17 +20,7 @@ class ClassificationResult:
 
     def __repr__(self):
         return f"ClassificationResult(category={self.category!r}, reason={self.reason!r})"
-
-
 class EmailClassifier:
-    """
-    Классифицирует письма по правилам.
-    Правила проверяются по приоритету - первое совпадение выигрывает.
-    """
-
-    # Слова-триггеры для каждой категории
-    # Порядок важен - более специфичные правила выше
-
     CRITICAL_keywords = [
         "критический инцидент",
         "критическая ошибка",
@@ -54,7 +40,6 @@ class EmailClassifier:
         "down",
         "outage",
     ]
-
     MONITORING_keywords = [
         "автоматическое уведомление",
         "это письмо сгенерировано автоматически",
@@ -157,17 +142,8 @@ class EmailClassifier:
     ]
 
     def classify(self, email):
-        """
-        Классифицирует письмо.
-        Возвращает ClassificationResult.
-        """
         text = email.get_full_text()
         sender = email.sender.lower()
-
-        # порядок важен! сначала spam (безопасность прежде всего),
-        # потом critical, потом monitoring, потом requests, потом info
-
-        # 1. Спам - проверяем отдельно, он может замаскироваться
         result = self._check_spam(text, sender)
         if result:
             return result
@@ -176,22 +152,18 @@ class EmailClassifier:
         result = self._check_critical(text, sender)
         if result:
             return result
-
         # 3. Мониторинг - автоматические уведомления
         result = self._check_monitoring(text, sender)
         if result:
             return result
-
         # 4. Заявки и запросы
         result = self._check_requests(text, sender)
         if result:
             return result
-
         # 5. Информационные рассылки
         result = self._check_info(text, sender)
         if result:
             return result
-
         # 6. Ничего не подошло
         logger.debug(f"Письмо не классифицировано: {email.filename}")
         return ClassificationResult(
@@ -209,7 +181,6 @@ class EmailClassifier:
                     confidence=0.9
                 )
         return None
-
     def _check_critical(self, text, sender):
         # критические письма часто имеют несколько признаков сразу
         matches_count = 0
@@ -261,7 +232,6 @@ class EmailClassifier:
         return None
 
     def _check_info(self, text, sender):
-        # noreply отправители без признаков мониторинга - скорее всего инфо-рассылка
         noreply_senders = ["no-reply@", "noreply@", "newsletter@", "news@"]
         for ns in noreply_senders:
             if ns in sender:

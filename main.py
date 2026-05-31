@@ -69,8 +69,6 @@ def main():
 
     stats = processor.process(args.inbox)
     stats.print_summary()
-
-    # возвращаем 0 если всё ок, 1 если были ошибки
     sys.exit(0 if stats.errors == 0 else 1)
 
 
